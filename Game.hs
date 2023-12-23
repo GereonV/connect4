@@ -7,6 +7,8 @@ module Game
     , getBoard
     , getMove
     , getResult
+    , isP1Turn
+    , isP2Turn
     , move
     , newGame
     , takeTurn
@@ -98,6 +100,9 @@ instance Show Board where
 
 getMove :: Move -> Int
 getMove (M x) = fromEnum x
+
+isP1Turn :: Game -> Bool
+isP1Turn = not . isP2Turn
 
 move :: Int -> Maybe Move
 move x

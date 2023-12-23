@@ -1,15 +1,17 @@
+import AI
 import Game
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 
-doIO :: Game -> IO (Either () Game)
-doIO g = print (getBoard g) >> maybe (Right <$> go) (fmap Left . printR) (getResult g)
+doIO :: Game -> IO (Maybe Game)
+doIO g = print (getBoard g) >> maybe (Just <$> go) ((Nothing <$) . printR) (getResult g)
   where
     printR r = putStrLn $ case r of
         P1Won -> "Player 1 won"
         Drawn -> "Game drawn"
         P2Won -> "Player 2 won"
     go = do
+        print . map fst $ possibleMoves g
         putStr "Choose column: "
         hFlush stdout
         m <- getLine
@@ -19,4 +21,4 @@ doIO g = print (getBoard g) >> maybe (Right <$> go) (fmap Left . printR) (getRes
 
 main :: IO ()
 main = go newGame
-  where go g = doIO g >>= either return go
+  where go g = doIO g >>= return () `maybe` go
