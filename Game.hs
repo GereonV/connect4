@@ -7,16 +7,16 @@ module Game
     , getBoard
     , getMove
     , getResult
-    , isP2Turn
     , move
     , newGame
     , takeTurn
     ) where
 
-import Data.Bifunctor (first, second)
-import Data.Bits ((.<<.), (.&.), (.|.), bit)
+import Data.Bifunctor (bimap, first, second)
+import Data.Bits ((.<<.), (.>>.), (.&.), (.|.), bit)
 import Data.Bool (bool)
-import Data.List (find, foldl')
+import Data.Function (on)
+import Data.List (find, foldl', intercalate)
 import Data.Maybe (fromJust, isNothing)
 import Data.Word (Word8, Word64)
 
@@ -84,6 +84,17 @@ checkBoard (B (p1, p2))
     rowMask = bitwise id
     shift r c = (.<<. (7 * r + c))
     won p = any ((==) <*> (p .&.)) $ col ++ row ++ diag
+
+instance Show Board where
+    show (B (p1, p2)) = foldl' ((. showR) . flip (++)) nums [0..5]
+      where
+        sep = replicate 29 '-'
+        nums = sep ++ "\n  " ++ intercalate "   " (show <$> [1..7])
+        showR i = intercalate " | " (symbAt i <$> [6,5..0]) `intercalate` ["| ", " |\n"]
+        symb True  False = "\ESC[93mO\ESC[0m"
+        symb False True  = "\ESC[91mX\ESC[0m"
+        symb False False = " "
+        symbAt r c = on symb (\x -> (/= 0) . (x .&.) . bit $ 7 * r + c) p1 p2
 
 getMove :: Move -> Int
 getMove (M x) = fromEnum x
